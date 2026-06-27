@@ -286,7 +286,7 @@ function fetchStock(ticker) {
   var intradayUrl = base + '?interval=5m&range=1d&includePrePost=false';
   var sumUrl = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/' +
     encodeURIComponent(ticker) + '?modules=defaultKeyStatistics%2CrecommendationTrend';
-  return Promise.all([fetchJ(chartUrl), fetchJ(sumUrl), fetchJ(intradayUrl).catch(function(){ return null; })])
+  return Promise.all([fetchJ(chartUrl), fetchJ(sumUrl).catch(function(){ return null; }), fetchJ(intradayUrl).catch(function(){ return null; })])
     .then(function(res) {
       var cr = res[0].chart.result[0];
       var rawC = cr.indicators.quote[0].close;
@@ -294,8 +294,9 @@ function fetchStock(ticker) {
       var closes = [];
       for (var i = 0; i < rawC.length; i++) { if (rawC[i] != null && rawC[i] > 0) closes.push(rawC[i]); }
       var curP    = meta.regularMarketPrice || closes[closes.length - 1];
-      var prevC   = meta.chartPreviousClose || (closes.length > 1 ? closes[closes.length - 2] : curP);
-      var chPct   = prevC ? (curP - prevC) / prevC * 100 : 0;
+      var prevC   = meta.chartPreviousClose || meta.previousClose || (closes.length > 1 ? closes[closes.length - 2] : curP);
+      var chPct   = meta.regularMarketChangePercent != null ? meta.regularMarketChangePercent :
+                    (prevC ? (curP - prevC) / prevC * 100 : 0);
       var cur     = (meta.currency === 'EUR' || meta.currency === 'GBp') ? 'E' : '$';
       var rsi     = computeRSI(closes, 14);
       var ma50 = 0, ma200 = 0, j, sl;
