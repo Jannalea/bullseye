@@ -2,7 +2,9 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>BullsEye</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,11 +27,19 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
 .search-inp{width:100%;padding:14px 16px 14px 44px;background:#F7F7F8;border:none;outline:none;border-radius:14px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;color:#0A0A0A;}
 .init-inp{width:36px;height:36px;border-radius:50%;background:#F2F3F5;border:none;outline:none;text-align:center;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;text-transform:uppercase;cursor:text;padding:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
+@media(max-width:480px){
+  body{background:#fff;padding:0;display:block;}
+  #phone{width:100%;height:100dvh;border-radius:0;box-shadow:none;padding-top:env(safe-area-inset-top);}
+  #status-bar{display:none!important;}
+  #home-bar{display:none!important;}
+  #scroll-area{height:calc(100dvh - env(safe-area-inset-top) - 88px - env(safe-area-inset-bottom));}
+  .tab-bar{height:calc(88px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);}
+}
 </style>
 </head>
 <body>
 <div id="phone">
-  <div style="height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;flex-shrink:0;">
+  <div id="status-bar" style="height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;flex-shrink:0;">
     <span class="num" style="font-size:15px;font-weight:700;">9:41</span>
     <div style="width:122px;height:32px;"></div>
     <div style="display:flex;align-items:center;gap:6px;">
@@ -48,7 +58,7 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
       <span id="tbl-lg" style="font-size:11px;font-weight:700;color:#B5B5BA;">Legende</span>
     </button>
   </div>
-  <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#0A0A0A;border-radius:999px;"></div>
+  <div id="home-bar" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#0A0A0A;border-radius:999px;"></div>
 </div>
 <script>
 // ── CATALOG ─────────────────────────────────────────────────────────────────
@@ -238,7 +248,7 @@ for (var _i = 0; _i < CAT.length; _i++) { BY_T[CAT[_i].t] = CAT[_i]; }
 
 // ── LIVE DATA ────────────────────────────────────────────────────────────────
 var LIVE = {};
-var CACHE_KEY = 'bullseye_v1';
+var CACHE_KEY = 'bullseye_v2';
 var CACHE_TTL = 30 * 60 * 1000;
 var WL_KEY    = 'bullseye_wl_v1';
 var FX_USDEUR = 0.92;
@@ -393,6 +403,7 @@ function applyLiveToState(ticker, data) {
   s.ind = [['RSI (14)', rsiStr, rsiSig], ['Trend (MA 50/200)', trendStr, trendSig], ['KGV', peStr, peSig], ['Analysten-Konsens', analystStr, aSig]];
   s.why = generateWhy(data);
   if (data.news) s.news = data.news;
+  if (data.features) s.features = data.features;
   LIVE[ticker] = data;
 }
 
@@ -620,6 +631,118 @@ var SIG_LABEL = {green:'Kaufen',  yellow:'Abwarten', red:'Finger weg'};
 var IND_DOT   = {g:'#16C784',     n:'#9A9AA0',       r:'#F5475B'};
 var PER_LABEL = {'1T':'Heute','1W':'1 Woche','1M':'1 Monat','1J':'1 Jahr','Max':'Max'};
 
+// ── ANLAGEHORIZONTE ──────────────────────────────────────────────────────────
+var HORIZONS = [
+  {id:'short', label:'0–30 Tage',
+   w:{rsi:.20,trend:.12,macd:.15,momentum:.15,volatility:.10,newsSentiment:.15,pe:.02,analyst:.05,revenueGrowth:.02,epsGrowth:.02,fcf:.01,roic:.00,debt:.01}},
+  {id:'mid',   label:'1–6 Monate',
+   w:{rsi:.08,trend:.12,macd:.08,momentum:.08,volatility:.04,newsSentiment:.10,pe:.12,analyst:.15,revenueGrowth:.10,epsGrowth:.07,fcf:.03,roic:.01,debt:.02}},
+  {id:'long',  label:'1–3 Jahre',
+   w:{rsi:.02,trend:.05,macd:.02,momentum:.02,volatility:.01,newsSentiment:.04,pe:.14,analyst:.08,revenueGrowth:.15,epsGrowth:.13,fcf:.13,roic:.10,debt:.11}},
+  {id:'vlong', label:'5–10+ Jahre',
+   w:{rsi:.00,trend:.02,macd:.01,momentum:.01,volatility:.00,newsSentiment:.02,pe:.14,analyst:.04,revenueGrowth:.15,epsGrowth:.15,fcf:.18,roic:.16,debt:.12}},
+];
+function scoreToRec(score) {
+  if (score >= 80) return {l:'Starker Kauf', c:'#16C784'};
+  if (score >= 63) return {l:'Kaufen',       c:'#16C784'};
+  if (score >= 45) return {l:'Neutral',      c:'#F5A623'};
+  if (score >= 30) return {l:'Nicht kaufen', c:'#F5475B'};
+  return               {l:'Verkaufen',       c:'#F5475B'};
+}
+function computeHorizonScore(f, w) {
+  var ws = 0, wt = 0, avail = 0, total = 0;
+  for (var k in w) {
+    total++;
+    if (w[k] > 0 && f[k] != null) { ws += f[k] * w[k]; wt += w[k]; avail++; }
+  }
+  return {score: wt > 0 ? Math.round(ws / wt) : 50, conf: Math.round(avail / (total || 1) * 100)};
+}
+function horizonRationale(id, f) {
+  var out = [];
+  if (id === 'short') {
+    if (f.rsi != null) {
+      if      (f.rsi >= 72) out.push('RSI signalisiert überkaufte Zone – kurzfristig erhöhtes Rückschlagrisiko.');
+      else if (f.rsi <= 28) out.push('RSI zeigt überverkaufte Zone – kurzfristiges Erholungspotenzial vorhanden.');
+    }
+    if (f.momentum != null) {
+      if      (f.momentum >= 70) out.push('Starkes Kursmomentum stützt kurzfristig den Aufwärtstrend.');
+      else if (f.momentum <= 30) out.push('Schwaches Momentum signalisiert anhaltenden Abwärtsdruck.');
+    }
+    if (!out.length && f.newsSentiment != null) {
+      if      (f.newsSentiment >= 70) out.push('Positive Nachrichtenlage wirkt kurzfristig als Kurstreiber.');
+      else if (f.newsSentiment <= 30) out.push('Negativer Newsflow belastet die kurzfristige Marktstimmung.');
+    }
+  } else if (id === 'mid') {
+    if (f.trend != null) {
+      if      (f.trend >= 70) out.push('Kurs über MA50 und MA200 – mittelfristiger Trend intakt.');
+      else if (f.trend <= 25) out.push('Kurs unter MA50 und MA200 – mittelfristiger Trend negativ.');
+    }
+    if (f.analyst != null) {
+      if      (f.analyst >= 70) out.push('Analysten sehen mittelfristig klares Aufwärtspotenzial.');
+      else if (f.analyst <= 35) out.push('Analytiker sind für den mittelfristigen Ausblick zurückhaltend.');
+    }
+    if (!out.length && f.pe != null) {
+      if      (f.pe >= 70) out.push('Attraktive Bewertung bietet mittelfristiges Kurspotenzial.');
+      else if (f.pe <= 30) out.push('Hohe Bewertung schränkt das mittelfristige Aufwärtspotenzial ein.');
+    }
+  } else if (id === 'long') {
+    if (f.revenueGrowth != null) {
+      if      (f.revenueGrowth >= 70) out.push('Starkes Umsatzwachstum schafft solide langfristige Kursperspektive.');
+      else if (f.revenueGrowth <= 30) out.push('Schwaches Umsatzwachstum begrenzt die langfristige Kursentwicklung.');
+    }
+    if (f.fcf != null) {
+      if      (f.fcf >= 70) out.push('Hoher Free Cashflow stärkt Investitionsfähigkeit und Substanzwert.');
+      else if (f.fcf <= 30) out.push('Geringer Free Cashflow limitiert langfristige Wachstumsinvestitionen.');
+    }
+    if (!out.length && f.roic != null) {
+      if      (f.roic >= 70) out.push('Starke Kapitalrendite belegt dauerhaften Wettbewerbsvorteil.');
+      else if (f.roic <= 30) out.push('Niedrige Kapitalrendite deutet auf strukturelle Schwächen hin.');
+    }
+  } else {
+    if (f.fcf != null) {
+      if      (f.fcf >= 70) out.push('Exzellenter Free Cashflow schafft über Jahrzehnte nachhaltigen Unternehmenswert.');
+      else if (f.fcf <= 30) out.push('Schwacher Free Cashflow gefährdet die sehr langfristige Wertschöpfung.');
+    }
+    if (f.roic != null) {
+      if      (f.roic >= 70) out.push('Sehr hohe Kapitalrendite spricht für einen dauerhaften wirtschaftlichen Burggraben.');
+      else if (f.roic <= 30) out.push('Geringe Kapitalrendite deutet auf fehlende Wettbewerbsvorteile hin.');
+    }
+    if (!out.length && f.debt != null) {
+      if      (f.debt >= 75) out.push('Solide Bilanzqualität stärkt die Widerstandsfähigkeit über Marktzyklen.');
+      else if (f.debt <= 30) out.push('Hohe Verschuldung erhöht die Anfälligkeit in Abschwungphasen.');
+    }
+  }
+  return out.slice(0,2).join(' ') || 'Analyse basiert auf den verfügbaren Kennzahlen.';
+}
+function buildHorizons(s) {
+  var f = s.features;
+  if (!f) return '';
+  var items = HORIZONS.map(function(h) {
+    var res = computeHorizonScore(f, h.w);
+    var rec = scoreToRec(res.score);
+    var rat = horizonRationale(h.id, f);
+    var bc  = res.score >= 63 ? '#16C784' : res.score >= 45 ? '#F5A623' : '#F5475B';
+    return '<div style="padding:10px 0;border-top:1px solid #F1F1F2;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">' +
+        '<span style="font-size:12.5px;font-weight:700;color:#0A0A0A;">' + xe(h.label) + '</span>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span class="num" style="font-size:11.5px;font-weight:700;color:' + bc + ';">' + res.score + '<span style="font-size:10px;font-weight:500;color:#B5B5BA;">/100</span></span>' +
+          '<span style="font-size:12px;font-weight:800;color:' + rec.c + ';">' + xe(rec.l) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="height:4px;background:#F1F1F2;border-radius:999px;overflow:hidden;margin-bottom:6px;">' +
+        '<div style="height:100%;width:' + res.score + '%;background:' + bc + ';border-radius:999px;"></div>' +
+      '</div>' +
+      '<p style="font-size:11.5px;color:#56535F;line-height:1.5;margin:0 0 3px;">' + xe(rat) + '</p>' +
+      '<span style="font-size:10.5px;color:#B5B5BA;">Konfidenz ' + res.conf + ' %</span>' +
+    '</div>';
+  }).join('');
+  return '<div style="margin-top:10px;padding:12px 16px;background:#fff;border-radius:14px;">' +
+    '<div style="font-size:12px;font-weight:800;color:#0A0A0A;letter-spacing:.01em;padding-bottom:2px;">Anlagehorizonte</div>' +
+    items +
+  '</div>';
+}
+
 // ── CLAUDE ANALYSE ───────────────────────────────────────────────────────────
 function showToast(msg) {
   var old = document.getElementById('bs-toast');
@@ -757,6 +880,7 @@ function buildDetail(s) {
       '</span></div>';
   }).join('');
 
+  var horizonsHtml = buildHorizons(s);
   var newsHtml = '';
   if (s.news && s.news.length) {
     var SENT_COL = {buy:'#16C784', sell:'#F5475B', neutral:'#B5B5BA'};
@@ -818,6 +942,7 @@ function buildDetail(s) {
       '<p style="margin:0 0 6px;font-size:13px;color:#56535F;line-height:1.6;">' + xe(s.why) + '</p>' +
       '<div style="margin-top:8px;">' + inds + '</div>' +
     '</div>' +
+    horizonsHtml +
     newsHtml +
     analyzeBtn +
   '</div>';
