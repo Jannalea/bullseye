@@ -46,7 +46,7 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
 .search-inp{width:100%;padding:14px 16px 14px 44px;background:#F7F7F8;border:none;outline:none;border-radius:14px;font-family:'Manrope',sans-serif;font-size:16px;font-weight:600;color:#0A0A0A;}
 .init-inp{width:36px;height:36px;border-radius:50%;background:#F2F3F5;border:none;outline:none;text-align:center;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;color:#0A0A0A;text-transform:uppercase;cursor:text;padding:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
-#sr-panel{display:none;position:absolute;left:0;right:0;bottom:88px;z-index:20;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -2px 20px rgba(0,0,0,.10);max-height:65%;overflow-y:auto;}
+#sr-panel{display:none;position:absolute;left:0;right:0;bottom:88px;z-index:100;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -2px 20px rgba(0,0,0,.10);max-height:65%;overflow-y:auto;}
 @media(max-width:480px){#sr-panel{bottom:calc(88px + env(safe-area-inset-bottom));}}
 @media(max-width:480px){
   body{background:#fff;padding:0;display:block;}
@@ -69,7 +69,6 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
     </div>
   </div>
   <div id="scroll-area"></div>
-  <div id="sr-panel"></div>
   <div class="tab-bar">
     <button class="tab-btn-el" onclick="setTab('scanner')">
       <svg id="tbi-sc" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
@@ -81,6 +80,7 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
     </button>
   </div>
   <div id="home-bar" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#0A0A0A;border-radius:999px;"></div>
+  <div id="sr-panel"></div>
 </div>
 <script>
 // ── CATALOG ─────────────────────────────────────────────────────────────────
@@ -1099,35 +1099,6 @@ function buildScanner() {
     '</div>';
 }
 
-function buildSearchResults() {
-  var q = S.query.trim().toLowerCase();
-  if (q.length < 1) return '';
-  var res = CAT.filter(function(c) {
-    return S.wl.indexOf(c.t) < 0 &&
-      (c.n.toLowerCase().indexOf(q) >= 0 || c.t.toLowerCase().indexOf(q) >= 0);
-  }).slice(0, 6);
-  if (!res.length) {
-    return '<div style="padding:16px;text-align:center;font-size:13px;color:#9A9AA0;">Keine Aktie gefunden.</div>';
-  }
-  return '<div style="padding:8px 0;">' +
-    res.map(function(r) {
-      var rLive = !!LIVE[r.t];
-      return '<div data-add="' + xe(r.t) + '" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #F4F4F5;cursor:pointer;">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:#F2F3F5;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">' + xe(r.n.charAt(0)) + '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:700;font-size:14px;">' + xe(r.n) + '</div>' +
-          '<div style="margin-top:1px;font-size:11.5px;color:#9A9AA0;">' + xe(r.t) + '</div>' +
-          (rLive ? '' : '<div style="margin-top:2px;font-size:11px;font-weight:600;color:#F5A623;">Keine aktuellen Daten abrufbar</div>') +
-        '</div>' +
-        '<span style="width:9px;height:9px;border-radius:50%;background:' + (rLive ? SIG_DOT[r.sig] : '#D0D0D5') + ';flex-shrink:0;"></span>' +
-        '<div style="width:30px;height:30px;border-radius:50%;background:#0A0A0A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-        '</div>' +
-      '</div>';
-    }).join('') +
-  '</div>';
-}
-
 function buildLegende() {
   return '<div style="padding:8px 20px 30px;">' +
     '<div style="display:flex;align-items:center;gap:9px;padding-bottom:6px;">' +
@@ -1319,12 +1290,14 @@ function attachDelegated() {
 
 function updateSearchArea() {
   var q = S.query.trim().toLowerCase();
-  var sinp = document.querySelector('[data-id="search"]');
-  if (!sinp) return;
-  var container = sinp.parentElement.parentElement;
-  var old = container.querySelector('[data-srbox]');
-  if (old) old.parentElement.removeChild(old);
-  if (q.length < 1) { _yfQuery = ''; clearTimeout(_yfTimer); return; }
+  var panel = document.getElementById('sr-panel');
+  if (!panel) return;
+
+  if (q.length < 1) {
+    panel.style.display = 'none';
+    panel.innerHTML = '';
+    _yfQuery = ''; clearTimeout(_yfTimer); return;
+  }
 
   var catRes = CAT.filter(function(c) {
     return S.wl.indexOf(c.t) < 0 &&
@@ -1332,10 +1305,14 @@ function updateSearchArea() {
   }).slice(0, 5);
 
   function catRowHtml(r) {
+    var rLive = !!LIVE[r.t];
     return '<div data-add="' + xe(r.t) + '" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #F4F4F5;cursor:pointer;">' +
       '<div style="width:36px;height:36px;border-radius:50%;background:#F2F3F5;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">' + xe(r.n.charAt(0)) + '</div>' +
-      '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">' + xe(r.n) + '</div><div style="margin-top:1px;font-size:11.5px;color:#9A9AA0;">' + xe(r.t) + '</div></div>' +
-      '<span style="width:9px;height:9px;border-radius:50%;background:' + SIG_DOT[r.sig] + ';flex-shrink:0;"></span>' +
+      '<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;">' + xe(r.n) + '</div>' +
+        '<div style="margin-top:1px;font-size:11.5px;color:#9A9AA0;">' + xe(r.t) + '</div>' +
+        (rLive ? '' : '<div style="margin-top:2px;font-size:11px;font-weight:600;color:#F5A623;">Keine aktuellen Daten abrufbar</div>') +
+      '</div>' +
+      '<span style="width:9px;height:9px;border-radius:50%;background:' + (rLive ? SIG_DOT[r.sig] : '#D0D0D5') + ';flex-shrink:0;"></span>' +
       '<div style="width:30px;height:30px;border-radius:50%;background:#0A0A0A;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
       '</div></div>';
@@ -1351,10 +1328,6 @@ function updateSearchArea() {
       '</div></div>';
   }
 
-  var box = document.createElement('div');
-  box.setAttribute('data-srbox', '1');
-  box.style.cssText = 'margin-top:10px;border:1px solid #F0F0F0;border-radius:14px;overflow:hidden;';
-
   var catHtml = catRes.map(catRowHtml).join('');
   var yfSection = '<div data-yfsec="1">' +
     (catRes.length ? '<div style="padding:5px 14px 3px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#C0C0C5;background:#FAFAFA;border-top:1px solid #F4F4F5;">Alle Börsen</div>' : '') +
@@ -1362,20 +1335,18 @@ function updateSearchArea() {
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C5" stroke-width="2.2" stroke-linecap="round" style="animation:spin .9s linear infinite;margin-right:7px;vertical-align:middle;"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>' +
       'Suche auf Yahoo Finance…</div>' +
   '</div>';
-  box.innerHTML = catHtml + yfSection;
-  container.appendChild(box);
+
+  panel.innerHTML = '<div style="border-radius:14px;overflow:hidden;">' + catHtml + yfSection + '</div>';
+  panel.style.display = 'block';
 
   searchYahoo(q, function(yfRes) {
-    var sec = box.querySelector('[data-yfsec]');
+    var sec = panel.querySelector('[data-yfsec]');
     if (!sec) return;
     if (yfRes.length) {
       var header = catRes.length ? '<div style="padding:5px 14px 3px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#C0C0C5;background:#FAFAFA;border-top:1px solid #F4F4F5;">Alle Börsen</div>' : '';
       sec.innerHTML = header + yfRes.map(yfRowHtml).join('');
     } else if (!catRes.length) {
-      box.style.cssText = 'margin-top:10px;border:1px solid #F0F0F0;border-radius:14px;padding:16px;text-align:center;font-size:13px;color:#9A9AA0;';
-      box.removeAttribute('data-srbox');
-      box.setAttribute('data-srbox', '1');
-      box.textContent = 'Keine Aktie gefunden.';
+      panel.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:#9A9AA0;">Keine Aktie gefunden.</div>';
     } else {
       sec.parentNode.removeChild(sec);
     }
@@ -1393,19 +1364,12 @@ function render() {
 
   // Search overlay
   var srPanel = document.getElementById('sr-panel');
-  if (srPanel) {
-    if (S.tab === 'scanner' && S.query.trim().length >= 1) {
-      srPanel.innerHTML = buildSearchResults();
-      srPanel.style.display = 'block';
-    } else {
-      srPanel.style.display = 'none';
-      srPanel.innerHTML = '';
-    }
-  }
+  if (srPanel) { srPanel.style.display = 'none'; srPanel.innerHTML = ''; }
 
   // Restore input values
   var si = area.querySelector('[data-id="search"]');
   if (si) si.value = S.query;
+  if (S.tab === 'scanner' && S.query.trim().length >= 1) updateSearchArea();
   var ii = area.querySelector('[data-id="initials"]');
   if (ii) ii.value = S.initials;
 
