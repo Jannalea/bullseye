@@ -620,6 +620,62 @@ var SIG_LABEL = {green:'Kaufen',  yellow:'Abwarten', red:'Finger weg'};
 var IND_DOT   = {g:'#16C784',     n:'#9A9AA0',       r:'#F5475B'};
 var PER_LABEL = {'1T':'Heute','1W':'1 Woche','1M':'1 Monat','1J':'1 Jahr','Max':'Max'};
 
+// ── CLAUDE ANALYSE ───────────────────────────────────────────────────────────
+function showToast(msg) {
+  var old = document.getElementById('bs-toast');
+  if (old) old.remove();
+  var el = document.createElement('div');
+  el.id = 'bs-toast';
+  el.textContent = msg;
+  el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#0A0A0A;color:#fff;padding:11px 20px;border-radius:12px;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25);pointer-events:none;transition:opacity .35s;';
+  document.body.appendChild(el);
+  setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { if (el.parentNode) el.remove(); }, 350); }, 3000);
+}
+
+function copyAnalysisPrompt(ticker) {
+  var s = BY_T[ticker];
+  if (!s) return;
+  var signalText = SIG_LABEL[s.sig] || 'Abwarten';
+  var priceStr = (s.c === 'E' ? s.p.toFixed(2) + ' €' : '$ ' + s.p.toFixed(2));
+  var chStr = (s.ch >= 0 ? '+' : '') + s.ch.toFixed(2) + ' %';
+  var indText = (s.ind || []).map(function(x) { return '• ' + x[0] + ': ' + x[1]; }).join('\n');
+  var newsText = '';
+  if (s.news && s.news.length) {
+    var sentMap = {buy:'Kaufargument', sell:'Warnsignal', neutral:'Info'};
+    newsText = '\n\nAktuelle News:\n' + s.news.map(function(n) {
+      return '• "' + n.title + '" (' + n.publisher + ') — ' + (sentMap[n.sentiment] || 'Info');
+    }).join('\n');
+  }
+  var prompt = 'Analysiere folgende Aktie als erfahrener Finanzanalyst:\n\n' +
+    'Aktie: ' + s.n + ' (' + ticker + ')\n' +
+    'Signal laut App: ' + signalText + '\n' +
+    'Kurs: ' + priceStr + ' (' + chStr + ')\n\n' +
+    'Technische Indikatoren:\n' + indText +
+    newsText + '\n\n' +
+    'Frage: Warum lautet das Signal „' + signalText + '“? Bitte recherchiere aktuelle Nachrichten und ' +
+    'Entwicklungen zu dieser Aktie und gib eine fundierte persönliche Einschätzung ' +
+    '(Kaufen / Halten / Verkaufen) mit Begründung auf Deutsch.';
+  var done = function() {
+    showToast('Prompt kopiert — Strg+V in Claude einfügen');
+    window.open('https://claude.ai/new', '_blank');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(prompt).then(done).catch(function() {
+      fallbackCopy(prompt); done();
+    });
+  } else { fallbackCopy(prompt); done(); }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
 // ── HTML BUILDERS ─────────────────────────────────────────────────────────────
 function logoSvg(stroke) {
   return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="' + stroke + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,17 9,11 13,15 21,7"></polyline><polyline points="15,7 21,7 21,13"></polyline></svg>';
@@ -716,6 +772,10 @@ function buildDetail(s) {
   }
 
   var sid = xe(s.t);
+  var analyzeBtn = '<button data-analyze="' + sid + '" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px 16px;background:#0A0A0A;color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.01em;">' +
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+    'Mit Claude analysieren' +
+  '</button>';
   return '<div style="padding:14px 2px 18px;border-bottom:1px solid #F4F4F5;background:#FAFAFA;border-radius:0 0 16px 16px;margin-bottom:2px;">' +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:0 12px;">' +
       '<div>' +
@@ -746,6 +806,7 @@ function buildDetail(s) {
       '<div style="margin-top:8px;">' + inds + '</div>' +
     '</div>' +
     newsHtml +
+    analyzeBtn +
   '</div>';
 }
 
@@ -1058,6 +1119,9 @@ function attachDelegated() {
     // Toggle change mode
     var tcm = t.closest ? t.closest('[data-toggle-mode]') : null;
     if (tcm) { toggleChMode(); return; }
+    // Claude analysis
+    var analyze = t.closest ? t.closest('[data-analyze]') : null;
+    if (analyze) { copyAnalysisPrompt(analyze.getAttribute('data-analyze')); return; }
   });
   area.addEventListener('input', function(e) {
     var el = e.target;
