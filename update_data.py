@@ -1,5 +1,6 @@
 import json
 import time
+import feedparser
 import yfinance as yf
 
 BULLISH_KW = [
@@ -36,29 +37,43 @@ def classify_sentiment(title):
     return 'neutral'
 
 def fetch_news(ticker_obj, ticker):
-    try:
-        raw = ticker_obj.news or []
-        results = []
-        seen = set()
-        for item in sorted(raw, key=lambda x: x.get('providerPublishTime', 0), reverse=True):
-            title = (item.get('title') or '').strip()
-            url   = (item.get('link')  or '').strip()
-            if not title or not url or title in seen:
-                continue
-            seen.add(title)
-            results.append({
-                'title':     title,
-                'url':       url,
-                'publisher': item.get('publisher', ''),
-                'time':      item.get('providerPublishTime', 0),
-                'sentiment': classify_sentiment(title),
-            })
-            if len(results) == 3:
-                break
-        return results
-    except Exception as e:
-        print(f'  news error for {ticker}: {e}')
-        return []
+    # Yahoo Finance RSS (no auth needed)
+    rss_urls = [
+        f'https://feeds.finance.yahoo.com/rss/2.0/headline?s={ticker}&region=US&lang=en-US',
+        f'https://news.google.com/rss/search?q={ticker}+stock&hl=en-US&gl=US&ceid=US:en',
+    ]
+    results = []
+    seen = set()
+    for url in rss_urls:
+        if len(results) >= 3:
+            break
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries:
+                if len(results) >= 3:
+                    break
+                title = (entry.get('title') or '').strip()
+                link  = (entry.get('link')  or '').strip()
+                if not title or not link or title in seen:
+                    continue
+                seen.add(title)
+                published = entry.get('published_parsed')
+                ts = int(time.mktime(published)) if published else 0
+                source = ''
+                try:
+                    source = entry.source.title
+                except Exception:
+                    source = entry.get('publisher', '')
+                results.append({
+                    'title':     title,
+                    'url':       link,
+                    'publisher': source,
+                    'time':      ts,
+                    'sentiment': classify_sentiment(title),
+                })
+        except Exception as e:
+            print(f'  news RSS error for {ticker} ({url}): {e}')
+    return results
 
 TICKERS = [
     'AAPL','MSFT','NVDA','AMZN','META','SAP.DE','SIE.DE','GOOGL','ALV.DE','BAYN.DE',
