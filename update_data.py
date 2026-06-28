@@ -2,6 +2,64 @@ import json
 import time
 import yfinance as yf
 
+BULLISH_KW = [
+    'beat','beats','exceeded','exceeds','record','surge','surges','surging','soars','soaring',
+    'rises','rising','rally','rallies','jumps','gains','tops','wins','awarded',
+    'growth','grows','upgrade','upgrades','upgraded','buy','outperform','strong',
+    'profit','profits','launch','launches','partnership','deal','acquisition','acquires',
+    'dividend','buyback','repurchase','expands','expansion','bullish','breakthrough',
+    'better than expected','above expectations','revenue beat','earnings beat',
+    'uebertrifft','waechst','rekord','kaufen','positiv','gewinn','steigt','auftrag',
+    'partnerschaft','dividende','stark','wachstum',
+]
+BEARISH_KW = [
+    'miss','misses','missed','cut','cuts','cutting','fall','falls','falling',
+    'drop','drops','dropping','plunge','plunges','slump','slumps','slumping',
+    'lawsuit','probe','investigation','recall','downgrade','downgrades','downgraded',
+    'sell','underperform','weak','loss','losses','decline','declines','declining',
+    'warning','warns','concern','concerns','risk','bearish','layoffs','layoff',
+    'fired','bankruptcy','fraud','fine','fined','penalty','disappoints','disappointing',
+    'below expectations','misses estimates','revenue miss','earnings miss',
+    'charges','impairment','write-down','write-off',
+    'verpasst','kuetzt','faellt','sinkt','klage','untersuchung','verkaufen',
+    'schwach','verlust','entlassungen','warnung','risiko','negativ','strafe',
+]
+
+def classify_sentiment(title):
+    t = title.lower()
+    bull = sum(1 for w in BULLISH_KW if w in t)
+    bear = sum(1 for w in BEARISH_KW if w in t)
+    if bull > bear:
+        return 'buy'
+    if bear > bull:
+        return 'sell'
+    return 'neutral'
+
+def fetch_news(ticker_obj, ticker):
+    try:
+        raw = ticker_obj.news or []
+        results = []
+        seen = set()
+        for item in sorted(raw, key=lambda x: x.get('providerPublishTime', 0), reverse=True):
+            title = (item.get('title') or '').strip()
+            url   = (item.get('link')  or '').strip()
+            if not title or not url or title in seen:
+                continue
+            seen.add(title)
+            results.append({
+                'title':     title,
+                'url':       url,
+                'publisher': item.get('publisher', ''),
+                'time':      item.get('providerPublishTime', 0),
+                'sentiment': classify_sentiment(title),
+            })
+            if len(results) == 3:
+                break
+        return results
+    except Exception as e:
+        print(f'  news error for {ticker}: {e}')
+        return []
+
 TICKERS = [
     'AAPL','MSFT','NVDA','AMZN','META','SAP.DE','SIE.DE','GOOGL','ALV.DE','BAYN.DE',
     'TSLA','INTC','DTE.DE','ADS.DE','AIR.DE','MUV2.DE','JPM','NFLX','KO','V','MA',
@@ -114,6 +172,7 @@ def fetch_ticker(ticker):
             'ma200':        ma200,
             'pe':           round(float(pe), 2) if pe else None,
             'analystScore': round(float(analyst_score), 3) if analyst_score else None,
+            'news':         fetch_news(t, ticker),
             'ts':           int(time.time() * 1000),
         }
     except Exception as e:
