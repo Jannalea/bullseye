@@ -54,88 +54,88 @@ body{background:#EDEEF0;display:flex;justify-content:center;padding:32px 0;min-h
 // ── CATALOG ─────────────────────────────────────────────────────────────────
 var CAT = [
   {t:'AAPL',  n:'Apple',               p:189.50,c:'$',ch:1.20, sig:'green', sc:3,
-   why:'Drei von vier Signalen sind positiv: Der Kurs notiert ueber der 50- und 200-Tage-Linie, der RSI ist neutral und die Analysten sehen mehrheitlich Aufwaertspotenzial. Nur das erhoehte KGV mahnt zur Vorsicht.',
-   ind:[['RSI (14)','52','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','29','r'],['Analysten-Konsens','1,9','g']]},
+   why:'Drei von vier Signalen sind positiv: Der Kurs notiert über der 50- und 200-Tage-Linie, der RSI ist neutral und die Analysten sehen mehrheitlich Aufwärtspotenzial. Nur das erhöhte KGV mahnt zur Vorsicht.',
+   ind:[['RSI (14)','52','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','29','r'],['Analysten-Konsens','1,9','g']]},
   {t:'MSFT',  n:'Microsoft',           p:449.78,c:'$',ch:0.74, sig:'green', sc:3,
-   why:'Stabiler Aufwaertstrend ueber beiden Moving Averages, Analysten klar im Kauf-Bereich. Einzig die erhoehte Bewertung ist zu beachten.',
-   ind:[['RSI (14)','58','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','34','r'],['Analysten-Konsens','1,8','g']]},
+   why:'Stabiler Aufwärtstrend über beiden Moving Averages, Analysten klar im Kauf-Bereich. Einzig die erhöhte Bewertung ist zu beachten.',
+   ind:[['RSI (14)','58','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','34','r'],['Analysten-Konsens','1,8','g']]},
   {t:'NVDA',  n:'NVIDIA',              p:126.40,c:'$',ch:4.82, sig:'green', sc:3,
-   why:'Der Kurs liegt klar ueber beiden MA-Linien, der RSI ist noch nicht ueberhitzt. Das hohe KGV ist im Wachstumssegment branchenueblich.',
-   ind:[['RSI (14)','64','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','38','r'],['Analysten-Konsens','1,6','g']]},
+   why:'Der Kurs liegt klar über beiden MA-Linien, der RSI ist noch nicht überhitzt. Das hohe KGV ist im Wachstumssegment branchenüblich.',
+   ind:[['RSI (14)','64','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','38','r'],['Analysten-Konsens','1,6','g']]},
   {t:'AMZN',  n:'Amazon',              p:186.51,c:'$',ch:0.90, sig:'green', sc:2,
-   why:'Aufwaertstrend intakt und Analysten-Konsens positiv. RSI und Bewertung liefern aktuell kein klares Gegensignal.',
-   ind:[['RSI (14)','55','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','41','r'],['Analysten-Konsens','1,9','g']]},
+   why:'Aufwärtstrend intakt und Analysten-Konsens positiv. RSI und Bewertung liefern aktuell kein klares Gegensignal.',
+   ind:[['RSI (14)','55','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','41','r'],['Analysten-Konsens','1,9','g']]},
   {t:'META',  n:'Meta Platforms',      p:504.22,c:'$',ch:2.05, sig:'green', sc:2,
-   why:'Klarer Trend mit auffaellig hohem Volumen, Analysten ueberwiegend positiv. Die Bewertung ist moderat.',
-   ind:[['RSI (14)','61','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','26','n'],['Analysten-Konsens','1,9','g']]},
+   why:'Klarer Trend mit auffällig hohem Volumen, Analysten überwiegend positiv. Die Bewertung ist moderat.',
+   ind:[['RSI (14)','61','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','26','n'],['Analysten-Konsens','1,9','g']]},
   {t:'SAP.DE',n:'SAP SE',              p:187.20,c:'E',ch:-0.20,sig:'yellow',sc:0,
-   why:'Gemischtes Bild: Der Analysten-Konsens ist neutral und das KGV erhoehe, waehrend der Trend seitwaerts laeuft.',
+   why:'Gemischtes Bild: Der Analysten-Konsens ist neutral und das KGV erhöhe, während der Trend seitwärts läuft.',
    ind:[['RSI (14)','50','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','32','r'],['Analysten-Konsens','2,6','n']]},
   {t:'SIE.DE',n:'Siemens',             p:176.30,c:'E',ch:0.30, sig:'yellow',sc:0,
-   why:'Seitwaertsphase ohne klaren Trend. RSI neutral, Bewertung fair – abwarten, bis sich eine Richtung zeigt.',
+   why:'Seitwärtsphase ohne klaren Trend. RSI neutral, Bewertung fair – abwarten, bis sich eine Richtung zeigt.',
    ind:[['RSI (14)','48','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','19','g'],['Analysten-Konsens','2,4','n']]},
   {t:'GOOGL', n:'Alphabet',            p:178.12,c:'$',ch:-0.38,sig:'yellow',sc:0,
    why:'Faire Bewertung und leicht positive Analysten, aber kein erkennbarer Trend. Erst beobachten.',
    ind:[['RSI (14)','49','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','24','n'],['Analysten-Konsens','2,1','n']]},
   {t:'ALV.DE',n:'Allianz',             p:289.40,c:'E',ch:0.10, sig:'yellow',sc:0,
-   why:'Ruhige Seitwaertsbewegung, RSI neutral, Bewertung guenstig. Solide, aber ohne akuten Ausloser.',
+   why:'Ruhige Seitwärtsbewegung, RSI neutral, Bewertung günstig. Solide, aber ohne akuten Auslöser.',
    ind:[['RSI (14)','51','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','12','g'],['Analysten-Konsens','2,3','n']]},
   {t:'BAYN.DE',n:'Bayer',              p:28.40, c:'E',ch:-1.80,sig:'red',   sc:-2,
-   why:'Mehrere Warnsignale: Der RSI ist ueberkauft und der Kurs notiert unter beiden Moving Averages. Auch die Analysten sind zurueckhaltend.',
+   why:'Mehrere Warnsignale: Der RSI ist überkauft und der Kurs notiert unter beiden Moving Averages. Auch die Analysten sind zurückhaltend.',
    ind:[['RSI (14)','74','r'],['Trend (MA 50/200)','unter beiden','r'],['KGV','7','g'],['Analysten-Konsens','3,1','r']]},
   {t:'TSLA',  n:'Tesla',               p:182.63,c:'$',ch:-2.34,sig:'red',   sc:-2,
-   why:'Ueberkaufter RSI und ein etablierter Abwaertstrend unter beiden MA-Linien. Die hohe Bewertung erhoeht das Rueckschlagrisiko.',
+   why:'Überkaufter RSI und ein etablierter Abwärtstrend unter beiden MA-Linien. Die hohe Bewertung erhöht das Rückschlagrisiko.',
    ind:[['RSI (14)','71','r'],['Trend (MA 50/200)','unter beiden','r'],['KGV','58','r'],['Analysten-Konsens','3,0','r']]},
   {t:'INTC',  n:'Intel',               p:30.12, c:'$',ch:-1.10,sig:'red',   sc:-1,
-   why:'Kurs unter den Moving Averages und skeptischer Analysten-Konsens. Es fehlt ein tragfaehiges Kaufargument.',
+   why:'Kurs unter den Moving Averages und skeptischer Analysten-Konsens. Es fehlt ein tragfähiges Kaufargument.',
    ind:[['RSI (14)','44','n'],['Trend (MA 50/200)','unter beiden','r'],['KGV','33','r'],['Analysten-Konsens','3,2','r']]},
   {t:'DTE.DE',n:'Deutsche Telekom',    p:24.80, c:'E',ch:0.60, sig:'green', sc:2,
-   why:'Kurs ueber beiden Moving Averages bei stabilem Trend, Analysten ueberwiegend positiv und moderate Bewertung.',
-   ind:[['RSI (14)','57','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','15','g'],['Analysten-Konsens','1,9','g']]},
+   why:'Kurs über beiden Moving Averages bei stabilem Trend, Analysten überwiegend positiv und moderate Bewertung.',
+   ind:[['RSI (14)','57','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','15','g'],['Analysten-Konsens','1,9','g']]},
   {t:'ADS.DE',n:'Adidas',              p:225.40,c:'E',ch:1.50, sig:'green', sc:2,
-   why:'Klare Trendwende nach oben ueber beiden MA-Linien, Analysten zunehmend optimistisch.',
-   ind:[['RSI (14)','62','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','37','r'],['Analysten-Konsens','1,8','g']]},
+   why:'Klare Trendwende nach oben über beiden MA-Linien, Analysten zunehmend optimistisch.',
+   ind:[['RSI (14)','62','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','37','r'],['Analysten-Konsens','1,8','g']]},
   {t:'AIR.DE',n:'Airbus',              p:158.90,c:'E',ch:0.80, sig:'green', sc:2,
-   why:'Solider Aufwaertstrend, volle Auftragsbuecker und positiver Analysten-Konsens stuetzen das Kaufsignal.',
-   ind:[['RSI (14)','59','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','28','n'],['Analysten-Konsens','1,7','g']]},
-  {t:'MUV2.DE',n:'Muenchener Rueck',   p:472.30,c:'E',ch:0.30, sig:'green', sc:2,
-   why:'Stabiler Aufwaertstrend, guenstige Bewertung und positive Analysten – defensives Kaufsignal.',
-   ind:[['RSI (14)','54','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','11','g'],['Analysten-Konsens','2,0','g']]},
+   why:'Solider Aufwärtstrend, volle Auftragsbücher und positiver Analysten-Konsens stuetzen das Kaufsignal.',
+   ind:[['RSI (14)','59','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','28','n'],['Analysten-Konsens','1,7','g']]},
+  {t:'MUV2.DE',n:'Münchener Rück',   p:472.30,c:'E',ch:0.30, sig:'green', sc:2,
+   why:'Stabiler Aufwärtstrend, günstige Bewertung und positive Analysten – defensives Kaufsignal.',
+   ind:[['RSI (14)','54','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','11','g'],['Analysten-Konsens','2,0','g']]},
   {t:'JPM',   n:'JPMorgan Chase',      p:198.60,c:'$',ch:0.70, sig:'green', sc:2,
-   why:'Kurs ueber beiden MA-Linien, robuste Fundamentaldaten und positiver Analysten-Konsens.',
-   ind:[['RSI (14)','56','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','12','g'],['Analysten-Konsens','1,9','g']]},
+   why:'Kurs über beiden MA-Linien, robuste Fundamentaldaten und positiver Analysten-Konsens.',
+   ind:[['RSI (14)','56','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','12','g'],['Analysten-Konsens','1,9','g']]},
   {t:'NFLX',  n:'Netflix',             p:678.20,c:'$',ch:1.90, sig:'green', sc:3,
-   why:'Starker Aufwaertstrend ueber beiden MA-Linien, Analysten klar im Kauf.',
-   ind:[['RSI (14)','66','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','45','r'],['Analysten-Konsens','1,7','g']]},
+   why:'Starker Aufwärtstrend über beiden MA-Linien, Analysten klar im Kauf.',
+   ind:[['RSI (14)','66','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','45','r'],['Analysten-Konsens','1,7','g']]},
   {t:'KO',    n:'Coca-Cola',           p:62.80, c:'$',ch:0.10, sig:'green', sc:2,
-   why:'Ruhiger Aufwaertstrend, defensives Profil und stabile Analysten-Einschaetzung.',
-   ind:[['RSI (14)','53','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','24','n'],['Analysten-Konsens','2,0','g']]},
+   why:'Ruhiger Aufwärtstrend, defensives Profil und stabile Analysten-Einschätzung.',
+   ind:[['RSI (14)','53','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','24','n'],['Analysten-Konsens','2,0','g']]},
   {t:'V',     n:'Visa',                p:274.30,c:'$',ch:0.50, sig:'green', sc:3,
-   why:'Konstanter Aufwaertstrend, hohe Margen und durchweg positive Analysten.',
-   ind:[['RSI (14)','60','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','30','n'],['Analysten-Konsens','1,6','g']]},
+   why:'Konstanter Aufwärtstrend, hohe Margen und durchweg positive Analysten.',
+   ind:[['RSI (14)','60','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','30','n'],['Analysten-Konsens','1,6','g']]},
   {t:'MA',    n:'Mastercard',          p:448.90,c:'$',ch:0.60, sig:'green', sc:3,
-   why:'Intakter Aufwaertstrend ueber beiden MA-Linien und sehr positiver Analysten-Konsens.',
-   ind:[['RSI (14)','61','n'],['Trend (MA 50/200)','ueber beiden','g'],['KGV','34','r'],['Analysten-Konsens','1,6','g']]},
+   why:'Intakter Aufwärtstrend über beiden MA-Linien und sehr positiver Analysten-Konsens.',
+   ind:[['RSI (14)','61','n'],['Trend (MA 50/200)','über beiden','g'],['KGV','34','r'],['Analysten-Konsens','1,6','g']]},
   {t:'BMW.DE',n:'BMW',                 p:97.20, c:'E',ch:0.40, sig:'yellow',sc:0,
-   why:'Gemischtes Bild: guenstige Bewertung trifft auf einen richtungslosen Trend.',
+   why:'Gemischtes Bild: günstige Bewertung trifft auf einen richtungslosen Trend.',
    ind:[['RSI (14)','50','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','6','g'],['Analysten-Konsens','2,5','n']]},
   {t:'MBG.DE',n:'Mercedes-Benz Group', p:68.50, c:'E',ch:-0.30,sig:'yellow',sc:0,
-   why:'Seitwaertsphase ohne klaren Trend, RSI neutral. Guenstig bewertet, aber kein akuter Ausloser.',
+   why:'Seitwärtsphase ohne klaren Trend, RSI neutral. Günstig bewertet, aber kein akuter Auslöser.',
    ind:[['RSI (14)','47','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','5','g'],['Analysten-Konsens','2,6','n']]},
   {t:'BAS.DE',n:'BASF',                p:43.10, c:'E',ch:0.20, sig:'yellow',sc:0,
-   why:'Kein klarer Trend, Analysten gespalten. Erst eine Bestaetigung abwarten.',
+   why:'Kein klarer Trend, Analysten gespalten. Erst eine Bestätigung abwarten.',
    ind:[['RSI (14)','49','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','21','n'],['Analysten-Konsens','2,7','n']]},
   {t:'DIS',   n:'Walt Disney',         p:101.40,c:'$',ch:-0.50,sig:'yellow',sc:0,
-   why:'Gemischte Signale: Erholung noch nicht bestaetigt, Analysten-Konsens neutral.',
+   why:'Gemischte Signale: Erholung noch nicht bestätigt, Analysten-Konsens neutral.',
    ind:[['RSI (14)','46','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','35','r'],['Analysten-Konsens','2,4','n']]},
   {t:'AMD',   n:'Advanced Micro Dev.',  p:159.04,c:'$',ch:0.12, sig:'yellow',sc:0,
-   why:'Hohe Volatilitaet ohne klare Richtung, RSI neutral. Hohe Bewertung – Bestaetigung abwarten.',
+   why:'Hohe Volatilität ohne klare Richtung, RSI neutral. Hohe Bewertung – Bestätigung abwarten.',
    ind:[['RSI (14)','52','n'],['Trend (MA 50/200)','gemischt','n'],['KGV','46','r'],['Analysten-Konsens','2,1','n']]},
   {t:'VOW3.DE',n:'Volkswagen',         p:98.10, c:'E',ch:-1.20,sig:'red',   sc:-1,
    why:'Kurs unter beiden Moving Averages und nachlassendes Momentum.',
    ind:[['RSI (14)','41','n'],['Trend (MA 50/200)','unter beiden','r'],['KGV','4','g'],['Analysten-Konsens','2,9','r']]},
   {t:'PFE',   n:'Pfizer',              p:28.10, c:'$',ch:-0.90,sig:'red',   sc:-1,
-   why:'Anhaltender Abwaertstrend unter beiden MA-Linien und skeptischer Analysten-Konsens.',
+   why:'Anhaltender Abwärtstrend unter beiden MA-Linien und skeptischer Analysten-Konsens.',
    ind:[['RSI (14)','39','n'],['Trend (MA 50/200)','unter beiden','r'],['KGV','17','g'],['Analysten-Konsens','2,9','r']]},
   // ── Cybersecurity & Cloud ───────────────────────────────────────────────────
   {t:'CRWD', n:'CrowdStrike',          p:330.00,c:'$',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
@@ -225,8 +225,8 @@ var CAT = [
   {t:'CON.DE',n:'Continental',        p:60.00, c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
   {t:'BEI.DE',n:'Beiersdorf',         p:135.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
   {t:'FRE.DE',n:'Fresenius',          p:30.00, c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
-  {t:'HNR1.DE',n:'Hannover Rueck',    p:230.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
-  {t:'DB1.DE',n:'Deutsche Boerse',    p:200.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
+  {t:'HNR1.DE',n:'Hannover Rück',    p:230.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
+  {t:'DB1.DE',n:'Deutsche Börse',    p:200.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
   {t:'EOAN.DE',n:'E.ON',              p:12.00, c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
   {t:'NESN.SW',n:'Nestle',            p:90.00, c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
   {t:'ROG.SW', n:'Roche',             p:265.00,c:'E',ch:0.00,sig:'yellow',sc:0,why:'Demo-Daten.',ind:[['RSI (14)','–','n'],['Trend (MA 50/200)','–','n'],['KGV','–','n'],['Analysten-Konsens','–','n']]},
@@ -335,28 +335,28 @@ function fetchStock(ticker) {
 function generateWhy(data) {
   var parts = [];
   if (data.rsi != null) {
-    if (data.rsi < 30)      parts.push('RSI ' + data.rsi + ': ueberkauft – moeglicher Einstieg.');
-    else if (data.rsi > 70) parts.push('RSI ' + data.rsi + ': ueberhitzt – Rueckschlagrisiko.');
+    if (data.rsi < 30)      parts.push('RSI ' + data.rsi + ': überkauft – möglicher Einstieg.');
+    else if (data.rsi > 70) parts.push('RSI ' + data.rsi + ': überhitzt – Rückschlagrisiko.');
     else                     parts.push('RSI ' + data.rsi + ' ist neutral.');
   }
   if (data.ma50 && data.ma200 && data.p) {
-    if (data.p > data.ma50 && data.p > data.ma200)      parts.push('Kurs ueber MA50 und MA200 – Aufwaertstrend intakt.');
-    else if (data.p < data.ma50 && data.p < data.ma200) parts.push('Kurs unter MA50 und MA200 – Abwaertstrend.');
+    if (data.p > data.ma50 && data.p > data.ma200)      parts.push('Kurs über MA50 und MA200 – Aufwärtstrend intakt.');
+    else if (data.p < data.ma50 && data.p < data.ma200) parts.push('Kurs unter MA50 und MA200 – Abwärtstrend.');
     else                                                  parts.push('Kurs zwischen den Moving Averages – unklare Richtung.');
   }
   if (data.pe != null && data.pe > 0) {
     var peS = data.pe.toFixed(1);
-    if (data.pe < 15)      parts.push('KGV ' + peS + ' ist guenstig.');
-    else if (data.pe > 25) parts.push('KGV ' + peS + ' ist erhoet.');
+    if (data.pe < 15)      parts.push('KGV ' + peS + ' ist günstig.');
+    else if (data.pe > 25) parts.push('KGV ' + peS + ' ist erhöht.');
     else                   parts.push('KGV ' + peS + ' ist moderat.');
   }
   if (data.analystScore != null) {
     var as = data.analystScore.toFixed(1);
     if (data.analystScore < 2.0)      parts.push('Analysten sehen Kaufpotenzial (Konsens: ' + as + ').');
-    else if (data.analystScore > 3.0) parts.push('Analysten sind zurueckhaltend (Konsens: ' + as + ').');
+    else if (data.analystScore > 3.0) parts.push('Analysten sind zurückhaltend (Konsens: ' + as + ').');
     else                               parts.push('Analysten-Konsens neutral (' + as + ').');
   }
-  return parts.length ? parts.join(' ') : 'Keine Signaldaten verfuegbar.';
+  return parts.length ? parts.join(' ') : 'Keine Signaldaten verfügbar.';
 }
 
 function applyLiveToState(ticker, data) {
@@ -374,7 +374,7 @@ function applyLiveToState(ticker, data) {
     else if (data.rsi > 70) { score--; rsiSig = 'r'; }
   }
   if (data.ma50 && data.ma200 && data.p) {
-    if (data.p > data.ma50 && data.p > data.ma200)      { score++; trendSig = 'g'; trendStr = 'ueber beiden'; }
+    if (data.p > data.ma50 && data.p > data.ma200)      { score++; trendSig = 'g'; trendStr = 'über beiden'; }
     else if (data.p < data.ma50 && data.p < data.ma200) { score--; trendSig = 'r'; trendStr = 'unter beiden'; }
     else { trendStr = 'gemischt'; }
   }
@@ -392,6 +392,7 @@ function applyLiveToState(ticker, data) {
   s.sig = score >= 1 ? 'green' : score <= -1 ? 'red' : 'yellow';
   s.ind = [['RSI (14)', rsiStr, rsiSig], ['Trend (MA 50/200)', trendStr, trendSig], ['KGV', peStr, peSig], ['Analysten-Konsens', analystStr, aSig]];
   s.why = generateWhy(data);
+  if (data.news) s.news = data.news;
   LIVE[ticker] = data;
 }
 
@@ -687,6 +688,33 @@ function buildDetail(s) {
       '</span></div>';
   }).join('');
 
+  var newsHtml = '';
+  if (s.news && s.news.length) {
+    var SENT_COL = {buy:'#16C784', sell:'#F5475B', neutral:'#B5B5BA'};
+    var SENT_LBL = {buy:'Kaufargument', sell:'Warnsignal', neutral:'Info'};
+    var nitems = s.news.map(function(n) {
+      var col = SENT_COL[n.sentiment] || '#B5B5BA';
+      var lbl = SENT_LBL[n.sentiment] || 'Info';
+      var d = new Date((n.time || 0) * 1000);
+      var ds = ('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+      return '<a href="' + xe(n.url) + '" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid #F1F1F2;text-decoration:none;">' +
+        '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';margin-top:5px;flex-shrink:0;"></span>' +
+        '<span style="flex:1;min-width:0;">' +
+          '<span style="display:block;font-size:12.5px;font-weight:600;color:#0A0A0A;line-height:1.4;">' + xe(n.title) + '</span>' +
+          '<span style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:4px;">' +
+            '<span style="font-size:11px;color:#9A9AA0;">' + xe(n.publisher) + ' · ' + ds + '</span>' +
+            '<span style="font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;color:' + col + ';background:' + col + '22;">' + xe(lbl) + '</span>' +
+          '</span>' +
+        '</span>' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C5C5CA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-top:4px;flex-shrink:0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+      '</a>';
+    }).join('');
+    newsHtml = '<div style="margin-top:10px;padding:12px 16px 4px;background:#fff;border-radius:14px;">' +
+      '<div style="font-size:12px;font-weight:800;color:#0A0A0A;letter-spacing:.01em;padding-bottom:2px;">Aktuelle News</div>' +
+      nitems +
+    '</div>';
+  }
+
   var sid = xe(s.t);
   return '<div style="padding:14px 2px 18px;border-bottom:1px solid #F4F4F5;background:#FAFAFA;border-radius:0 0 16px 16px;margin-bottom:2px;">' +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:0 12px;">' +
@@ -717,6 +745,7 @@ function buildDetail(s) {
       '<p style="margin:0 0 6px;font-size:13px;color:#56535F;line-height:1.6;">' + xe(s.why) + '</p>' +
       '<div style="margin-top:8px;">' + inds + '</div>' +
     '</div>' +
+    newsHtml +
   '</div>';
 }
 
