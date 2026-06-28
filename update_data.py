@@ -102,6 +102,7 @@ TICKERS = [
     'ASML.AS','MC.PA','OR.PA','TTE.PA','SAN.MC',
     'DHL.DE','ZAL.DE','RWE.DE','ENR.DE','CON.DE','BEI.DE','FRE.DE',
     'HNR1.DE','DB1.DE','EOAN.DE','NESN.SW','ROG.SW','NOVN.SW',
+    'RHM.DE',
 ]
 
 def _ema(values, n):
