@@ -2,6 +2,14 @@ import json
 import time
 import feedparser
 import yfinance as yf
+from deep_translator import GoogleTranslator
+
+def translate_de(text):
+    try:
+        result = GoogleTranslator(source='auto', target='de').translate(text)
+        return result if result else text
+    except Exception:
+        return text
 
 BULLISH_KW = [
     'beat','beats','exceeded','exceeds','record','surge','surges','surging','soars','soaring',
@@ -64,12 +72,14 @@ def fetch_news(ticker_obj, ticker):
                     source = entry.source.title
                 except Exception:
                     source = entry.get('publisher', '')
+                sentiment = classify_sentiment(title)
+                title_de  = translate_de(title)
                 results.append({
-                    'title':     title,
+                    'title':     title_de,
                     'url':       link,
                     'publisher': source,
                     'time':      ts,
-                    'sentiment': classify_sentiment(title),
+                    'sentiment': sentiment,
                 })
         except Exception as e:
             print(f'  news RSS error for {ticker} ({url}): {e}')
@@ -93,6 +103,126 @@ TICKERS = [
     'DHL.DE','ZAL.DE','RWE.DE','ENR.DE','CON.DE','BEI.DE','FRE.DE',
     'HNR1.DE','DB1.DE','EOAN.DE','NESN.SW','ROG.SW','NOVN.SW',
 ]
+
+def _ema(values, n):
+    if len(values) < n:
+        return None
+    k = 2.0 / (n + 1)
+    e = sum(values[:n]) / n
+    for v in values[n:]:
+        e = v * k + e * (1 - k)
+    return e
+
+def _macd_score(closes):
+    if len(closes) < 27:
+        return 50
+    e12 = _ema(closes, 12)
+    e26 = _ema(closes, 26)
+    if e12 is None or e26 is None:
+        return 50
+    macd = e12 - e26
+    tail = closes[-35:] if len(closes) >= 35 else closes
+    mv = []
+    for i in range(len(tail)):
+        m12 = _ema(tail[:i+1], 12)
+        m26 = _ema(tail[:i+1], 26)
+        if m12 and m26:
+            mv.append(m12 - m26)
+    sig = _ema(mv, 9) if len(mv) >= 9 else (mv[-1] if mv else 0)
+    if macd > sig and macd > 0: return 80
+    if macd > sig:               return 62
+    if macd <= sig and macd < 0: return 20
+    return 38
+
+def compute_feature_scores(data, closes, info):
+    f = {}
+    rsi = data.get('rsi', 50)
+    if   rsi <= 25: f['rsi'] = 88
+    elif rsi <= 35: f['rsi'] = 72
+    elif rsi <= 45: f['rsi'] = 60
+    elif rsi <= 55: f['rsi'] = 50
+    elif rsi <= 65: f['rsi'] = 40
+    elif rsi <= 75: f['rsi'] = 28
+    else:           f['rsi'] = 15
+    p, ma50, ma200 = data.get('p', 0), data.get('ma50', 0), data.get('ma200', 0)
+    if   p > ma50 and p > ma200:  f['trend'] = 80
+    elif p > ma50 or  p > ma200:  f['trend'] = 57
+    elif p < ma50 and p < ma200:  f['trend'] = 20
+    else:                          f['trend'] = 45
+    f['macd'] = _macd_score(closes)
+    if len(closes) >= 21:
+        mom = (closes[-1] - closes[-21]) / closes[-21] * 100
+        f['momentum'] = min(95, max(5, int(round(50 + mom * 2.5))))
+    else:
+        f['momentum'] = 50
+    if len(closes) >= 21:
+        rets = [(closes[i] - closes[i-1]) / closes[i-1] for i in range(-20, 0)]
+        vol_ann = (sum(r*r for r in rets) / len(rets)) ** 0.5 * (252 ** 0.5) * 100
+        f['volatility'] = min(90, max(10, int(round(80 - vol_ann * 1.2))))
+    else:
+        f['volatility'] = 50
+    pe = data.get('pe')
+    if pe is None:  f['pe'] = 50
+    elif pe <= 0:   f['pe'] = 30
+    elif pe < 10:   f['pe'] = 88
+    elif pe < 15:   f['pe'] = 78
+    elif pe < 20:   f['pe'] = 65
+    elif pe < 25:   f['pe'] = 55
+    elif pe < 35:   f['pe'] = 42
+    elif pe < 50:   f['pe'] = 30
+    else:           f['pe'] = 15
+    a = data.get('analystScore')
+    f['analyst'] = int(round(max(0, min(100, (5 - a) / 4 * 100)))) if a else 50
+    news = data.get('news', [])
+    if news:
+        sm = {'buy': 100, 'neutral': 50, 'sell': 0}
+        f['newsSentiment'] = int(round(sum(sm.get(n['sentiment'], 50) for n in news) / len(news)))
+    else:
+        f['newsSentiment'] = 50
+    rg = info.get('revenueGrowth')
+    if   rg is None:  f['revenueGrowth'] = 50
+    elif rg > 0.40:   f['revenueGrowth'] = 95
+    elif rg > 0.20:   f['revenueGrowth'] = 80
+    elif rg > 0.10:   f['revenueGrowth'] = 68
+    elif rg > 0.03:   f['revenueGrowth'] = 55
+    elif rg >= 0:     f['revenueGrowth'] = 42
+    else:             f['revenueGrowth'] = 20
+    eg = info.get('earningsGrowth')
+    if   eg is None:  f['epsGrowth'] = 50
+    elif eg > 0.30:   f['epsGrowth'] = 92
+    elif eg > 0.15:   f['epsGrowth'] = 75
+    elif eg > 0.05:   f['epsGrowth'] = 60
+    elif eg >= 0:     f['epsGrowth'] = 45
+    else:             f['epsGrowth'] = 18
+    fcf = info.get('freeCashflow')
+    rev = info.get('totalRevenue')
+    if fcf and rev and rev > 0:
+        m = fcf / rev
+        if   m > 0.25: f['fcf'] = 92
+        elif m > 0.15: f['fcf'] = 78
+        elif m > 0.08: f['fcf'] = 63
+        elif m > 0.02: f['fcf'] = 48
+        elif m >= 0:   f['fcf'] = 33
+        else:          f['fcf'] = 12
+    else:
+        f['fcf'] = 50
+    roe = info.get('returnOnEquity')
+    if   roe is None:  f['roic'] = 50
+    elif roe > 0.40:   f['roic'] = 92
+    elif roe > 0.25:   f['roic'] = 78
+    elif roe > 0.15:   f['roic'] = 63
+    elif roe > 0.05:   f['roic'] = 48
+    elif roe >= 0:     f['roic'] = 35
+    else:              f['roic'] = 15
+    dte = info.get('debtToEquity')
+    if   dte is None:  f['debt'] = 50
+    elif dte < 20:     f['debt'] = 92
+    elif dte < 50:     f['debt'] = 78
+    elif dte < 100:    f['debt'] = 62
+    elif dte < 200:    f['debt'] = 42
+    elif dte < 400:    f['debt'] = 25
+    else:              f['debt'] = 10
+    return {k: int(v) for k, v in f.items()}
 
 def compute_rsi(closes, period=14):
     if len(closes) < period + 1:
@@ -153,11 +283,12 @@ def fetch_ticker(ticker):
         ma50  = round(sum(closes[-50:])  / 50,  4) if len(closes) >= 50  else 0.0
         ma200 = round(sum(closes[-200:]) / 200, 4) if len(closes) >= 200 else 0.0
 
+        full_info = {}
         pe = None
         analyst_score = None
         try:
-            info = t.info
-            pe = info.get('trailingPE') or info.get('forwardPE')
+            full_info = t.info
+            pe = full_info.get('trailingPE') or full_info.get('forwardPE')
         except Exception:
             pass
         try:
@@ -177,7 +308,7 @@ def fetch_ticker(ticker):
         except Exception:
             pass
 
-        return {
+        result = {
             'p':            round(cur_p, 4),
             'ch':           round(ch_pct, 4),
             'currency':     currency,
@@ -190,6 +321,8 @@ def fetch_ticker(ticker):
             'news':         fetch_news(t, ticker),
             'ts':           int(time.time() * 1000),
         }
+        result['features'] = compute_feature_scores(result, closes, full_info)
+        return result
     except Exception as e:
         print(f'  {ticker}: ERROR - {e}')
         return None
