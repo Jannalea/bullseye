@@ -426,30 +426,33 @@ function loadLiveData(force) {
           if (Object.prototype.hasOwnProperty.call(d, t)) applyLiveToState(t, d[t]);
         }
         S.lastLoaded = cached.ts;
-        fetchFxRate().then(function() { render(); });
+        if (cached.fxUsdEur && cached.fxUsdEur > 0) FX_USDEUR = cached.fxUsdEur;
+        render();
         return;
       }
     } catch(e) {}
   }
   S.loading = true;
   render();
-  var tickers = S.wl.slice();
-  var allFetches = tickers.map(function(ticker) {
-    return fetchStock(ticker)
-      .then(function(data) { applyLiveToState(ticker, data); })
-      .catch(function(err) { console.warn(ticker + ': ' + err); });
-  });
-  allFetches.push(fetchFxRate());
-  Promise.all(allFetches).then(function() {
-    S.loading = false;
-    S.lastLoaded = Date.now();
-    try {
-      var cData = {};
-      for (var t in LIVE) { if (Object.prototype.hasOwnProperty.call(LIVE, t)) cData[t] = LIVE[t]; }
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ts: S.lastLoaded, data: cData}));
-    } catch(e) {}
-    render();
-  });
+  fetch('./data.json?_=' + Math.floor(Date.now() / 300000))
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(json) {
+      var d = json.data || {};
+      if (json.fxUsdEur && json.fxUsdEur > 0) FX_USDEUR = json.fxUsdEur;
+      for (var t in d) {
+        if (Object.prototype.hasOwnProperty.call(d, t)) applyLiveToState(t, d[t]);
+      }
+      S.loading = false;
+      S.lastLoaded = json.ts || Date.now();
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ts: S.lastLoaded, fxUsdEur: FX_USDEUR, data: LIVE}));
+      } catch(e) {}
+      render();
+    })
+    .catch(function() {
+      S.loading = false;
+      render();
+    });
 }
 
 function searchYahoo(q, callback) {
